@@ -199,39 +199,35 @@
 <script>
     function loadSavedTables() {
         const tableBody = document.getElementById('saved-tables-body');
-    
-        db.collection('tables')
-            .orderBy('timestamp', 'desc')
+        const savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
 
-            .onSnapshot((snapshot) => {                tableBody.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const table = doc.data();
-                    const pdfName = table.pdfName || 'Upload PDF';
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${table.date}</td>
-                        <td>${table.from}</td>
-                        <td>${table.to}</td>
-                        <td>$ ${table.usdCash}</td>
-                        <td>L£ ${table.lbpCash}</td>
-                        <td>$ ${table.eveningTotalUsd}</td>
-                        <td>L£ ${table.eveningTotalLbp}</td>
-                        <td>$ ${table.settlementUsd}</td>
-                        <td>L£ ${table.settlementLbp}</td>
-                        <td>$ ${table.settlementsDifference}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="view-btn" onclick="viewFullTable('${doc.id}')">View</button>
-                                <input type="file" id="pdf-upload-${doc.id}" accept="application/pdf" style="display: none;" onchange="handleFileUpload(event, '${doc.id}')">
-                                <button class="upload-btn" id="upload-btn-${doc.id}" onclick="document.getElementById('pdf-upload-${doc.id}').click();">${pdfName}</button>
-                                <button class="delete-btn" onclick="deleteTable('${doc.id}')">Delete</button>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            });
+        savedTables.forEach((table, index) => {
+            const pdfName = table.pdfName || 'Upload PDF';
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${table.date}</td>
+                <td>${table.from}</td> <!-- Display From name -->
+                <td>${table.to}</td> <!-- Display To name -->
+                <td>$ ${table.usdCash}</td>
+                <td>L£ ${table.lbpCash}</td>
+                <td>$ ${table.eveningTotalUsd}</td>
+                <td>L£ ${table.eveningTotalLbp}</td>
+                <td>$ ${table.settlementUsd}</td>
+                <td>L£ ${table.settlementLbp}</td>
+                <td>$ ${table.settlementsDifference}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="view-btn" onclick="viewFullTable(${index})">View</button>
+                        <input type="file" id="pdf-upload-${index}" accept="application/pdf" style="display: none;" onchange="handleFileUpload(event, ${index})">
+                        <button class="upload-btn" id="upload-btn-${index}" onclick="document.getElementById('pdf-upload-${index}').click();">${pdfName}</button>
+                        <button class="delete-btn" onclick="deleteTable(${index})">Delete</button>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
     }
+
     function deleteTable(index) {
         let savedTables = JSON.parse(localStorage.getItem('savedTables')) || [];
         savedTables.splice(index, 1);
@@ -346,11 +342,3 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-
-function saveTable(tableData) {
-    return db.collection('tables').add({
-        ...tableData,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: firebase.auth().currentUser.uid
-    });
-}
