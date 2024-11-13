@@ -8,4 +8,10 @@ const firebaseConfig = {
   measurementId: "G-8G9HXY8Y8C"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Initialize with error handling
+try {
+  firebase.initializeApp(firebaseConfig);
+  console.log('Firebase initialized successfully');
+} catch (error) {
+  console.log('Firebase initialization error:', error);
+}
